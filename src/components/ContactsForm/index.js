@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import FormGroup from '../FormGroup';
 
@@ -12,16 +12,33 @@ import useErrors from '../../hooks/useErrors';
 import isEmailValid from '../../utils/isEmailValid';
 import formatPhone from '../../utils/formatPhone';
 
-export default function ContactForm({ buttonLabel }) {
+import CategoriesService from '../../service/CategoriesService';
+
+export default function ContactForm({ buttonLabel, onSubmit }) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [category, setCategory] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const {
     errors, setError, removeError, getErrorMessageByFieldName,
   } = useErrors();
 
-  const isFormValid = (name && errors.length === 0);
+  const isFormValid = name.length === 0 && errors.length === 0;
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        const categoriesList = await CategoriesService.listCategories();
+        setCategories(categoriesList);
+      } catch {} finally {
+        setIsLoadingCategories(false);
+      }
+    }
+
+    loadCategories();
+  }, []);
 
   const handleNameChange = (event) => {
     setName(event.target.value);
@@ -50,8 +67,11 @@ export default function ContactForm({ buttonLabel }) {
   function handleSubmit(event) {
     event.preventDefault();
 
-    console.log({
-      name, phone: phone.replace(/\D/g, ''), email, category,
+    onSubmit({
+      name,
+      phone: phone.replace(/\D/g, ''),
+      email,
+      categoryId,
     });
   }
 
@@ -82,19 +102,23 @@ export default function ContactForm({ buttonLabel }) {
           maxLength="15"
         />
       </FormGroup>
-      <FormGroup>
+      <FormGroup isLoading={isLoadingCategories}>
         <Select
-          value={category}
-          onChange={(event) => setCategory(event.target.value)}
+          value={categoryId}
+          onChange={(event) => setCategoryId(event.target.value)}
+          disabled={isLoadingCategories}
         >
-          <option value="">Categoria</option>
-          <option value="instagram">Instagram</option>
-          <option value="discord">Discord</option>
+          <option value="">Sem categoria</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>{category.name}</option>
+          ))}
         </Select>
       </FormGroup>
 
       <ButtonContainer>
-        <Button type="submit" disabled={isFormValid}>{buttonLabel}</Button>
+        <Button type="submit" disabled={isFormValid}>
+          {buttonLabel}
+        </Button>
       </ButtonContainer>
     </Form>
   );
@@ -102,4 +126,5 @@ export default function ContactForm({ buttonLabel }) {
 
 ContactForm.propTypes = {
   buttonLabel: PropTypes.string.isRequired,
+  onSubmit: PropTypes.func.isRequired,
 };
