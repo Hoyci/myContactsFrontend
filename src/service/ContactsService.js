@@ -5,11 +5,15 @@ class ContactsService {
     this.httpClient = new HttpClient('http://localhost:3001');
   }
 
-  async listContacts(orderBy) {
+  listContacts(orderBy) {
     return this.httpClient.get(`/contacts?orderBy=${orderBy}`);
   }
 
-  async createContact(contact) {
+  getContactById(id) {
+    return this.httpClient.get(`/contacts/${id}`);
+  }
+
+  createContact(contact) {
     return this.httpClient.post('/contacts', { body: contact });
   }
 }

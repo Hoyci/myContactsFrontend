@@ -13,6 +13,11 @@ export default styled.input`
   transition: border-color 0.2s ease-in;
   appearance: none;
 
+  &[disabled] {
+    background-color: ${({ theme }) => theme.colors.gray[100]};
+    border-color: ${({ theme }) => theme.colors.gray[200]};
+  }
+
   &:focus {
     border-color: ${({ theme }) => theme.colors.primary.main};
   }
@@ -20,7 +25,5 @@ export default styled.input`
   ${({ theme, error }) => error && css`
       color: ${theme.colors.danger.main};
       border-color: ${theme.colors.danger.main} !important;
-    `
-}
-
+    `}
 `;

@@ -3,6 +3,8 @@ import ContactForm from '../../components/ContactsForm';
 
 import ContactsService from '../../service/ContactsService';
 
+import toast from '../../utils/toast';
+
 export default function NewContact() {
   const handleSubmit = async (formData) => {
     try {
@@ -13,10 +15,10 @@ export default function NewContact() {
         category_id: formData.categoryId,
       };
 
-      const response = await ContactsService.createContact(contact);
-      console.log('handleSubmit => newContact', response);
+      await ContactsService.createContact(contact);
+      toast({ type: 'success', text: 'Contato cadastrado com sucesso', duration: 3000 });
     } catch {
-      alert('Ocorreu um erro ao cadastrar usuário!');
+      toast({ type: 'danger', text: 'Ocorreu um erro ao cadastrar usuário!' });
     }
   };
 
