@@ -27,6 +27,7 @@ import formatPhone from '../../utils/formatPhone';
 import Loader from '../../components/Loader';
 import Button from '../../components/Button';
 import ContactsService from '../../service/ContactsService';
+import Modal from '../../components/Modal';
 
 export default function Home() {
   const [contacts, setContacts] = useState([]);
@@ -34,6 +35,8 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [contactBeingDeleted, setContactBeingDeleted] = useState(null);
 
   const filteredContacats = useMemo(
     () => contacts.filter(
@@ -46,7 +49,6 @@ export default function Home() {
     try {
       setIsLoading(true);
       const contactsList = await ContactsService.listContacts(orderBy);
-      // const contactsList = [];
 
       setHasError(false);
       setContacts(contactsList);
@@ -73,9 +75,33 @@ export default function Home() {
     loadContacts();
   };
 
+  const handleCloseModalVisible = () => {
+    setIsDeleteModalVisible(false);
+  };
+
+  const handleDeleteContact = (contact) => {
+    setContactBeingDeleted(contact);
+    setIsDeleteModalVisible(true);
+  };
+
+  const handleConfirmDeleteContact = () => {
+    console.log(contactBeingDeleted.id);
+  };
+
   return (
     <Container>
       <Loader isLoading={isLoading} />
+      <Modal
+        danger
+        visible={isDeleteModalVisible}
+        title={`Tem certeza que você deseja remover o contato "${contactBeingDeleted?.name}"?`}
+        confirmLabel="Deletar"
+        onCancel={handleCloseModalVisible}
+        onConfirm={handleConfirmDeleteContact}
+      >
+        <p>Está ação não poderá ser desfeita</p>
+      </Modal>
+
       {(!hasError && contacts.length > 0) && (
         <InputSearchContainer>
           <input
@@ -162,7 +188,7 @@ export default function Home() {
                 <Link to={`/edit/${contact.id}`}>
                   <img src={edit} alt="edit" />
                 </Link>
-                <button type="button">
+                <button type="button" onClick={() => handleDeleteContact(contact)}>
                   <img src={trash} alt="delete" />
                 </button>
               </div>

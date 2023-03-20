@@ -22,15 +22,15 @@ export const Container = styled.div`
   padding: 24px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.04);
 
-  h1 {
+  > h1 {
     color: ${({ theme, danger }) => (
     danger ? theme.colors.danger.main : theme.colors.gray[900]
   )};
     font-size: 22px;
   }
 
-  p {
-    margin-top: 8px;
+  .modal-body {
+    margin-top: 32px;
   }
 
   footer {
@@ -47,7 +47,7 @@ export const Footer = styled.footer`
     background: transparent;
     border: none;
     font-size: 16px;
-    margin-right: 8px;
+    margin-right: 32px;
     color: ${({ theme }) => theme.colors.gray[200]}
   }
 `;
