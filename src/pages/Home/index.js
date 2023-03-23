@@ -22,12 +22,13 @@ import sad from '../../assets/images/sad.svg';
 import emptyBox from '../../assets/images/empty-box.svg';
 import magnifierQuestion from '../../assets/images/magnifier-question.svg';
 
-import formatPhone from '../../utils/formatPhone';
-
 import Loader from '../../components/Loader';
 import Button from '../../components/Button';
 import ContactsService from '../../service/ContactsService';
 import Modal from '../../components/Modal';
+
+import formatPhone from '../../utils/formatPhone';
+import toast from '../../utils/toast';
 
 export default function Home() {
   const [contacts, setContacts] = useState([]);
@@ -37,6 +38,7 @@ export default function Home() {
   const [hasError, setHasError] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [contactBeingDeleted, setContactBeingDeleted] = useState(null);
+  const [isLoadingDelete, setIsLoadingDelete] = useState(false);
 
   const filteredContacats = useMemo(
     () => contacts.filter(
@@ -77,6 +79,7 @@ export default function Home() {
 
   const handleCloseModalVisible = () => {
     setIsDeleteModalVisible(false);
+    setContactBeingDeleted(null);
   };
 
   const handleDeleteContact = (contact) => {
@@ -84,8 +87,26 @@ export default function Home() {
     setIsDeleteModalVisible(true);
   };
 
-  const handleConfirmDeleteContact = () => {
-    console.log(contactBeingDeleted.id);
+  const handleConfirmDeleteContact = async () => {
+    try {
+      setIsLoadingDelete(true);
+      await ContactsService.deleteContact(contactBeingDeleted.id);
+
+      setContacts(
+        (prevState) => prevState.filter((contact) => contact.id !== contactBeingDeleted.id),
+      );
+      handleCloseModalVisible();
+
+      toast({
+        type: 'success',
+        text: 'Contato deletado com sucesso!',
+      });
+    } catch {
+      toast({
+        type: 'danger',
+        text: 'Erro ao deletar contato!',
+      });
+    }
   };
 
   return (
@@ -93,6 +114,7 @@ export default function Home() {
       <Loader isLoading={isLoading} />
       <Modal
         danger
+        isLoading={isLoadingDelete}
         visible={isDeleteModalVisible}
         title={`Tem certeza que você deseja remover o contato "${contactBeingDeleted?.name}"?`}
         confirmLabel="Deletar"
